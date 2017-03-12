@@ -8,7 +8,6 @@ The experiments have been carried out with a group of 30 volunteers within an ag
 The sensor signals (accelerometer and gyroscope) were pre-processed by applying noise filters and then sampled in fixed-width sliding windows of 2.56 sec and 50% overlap (128 readings/window). The sensor acceleration signal, which has gravitational and body motion components, was separated using a Butterworth low-pass filter into body acceleration and gravity. The gravitational force is assumed to have only low frequency components, therefore a filter with 0.3 Hz cutoff frequency was used. From each window, a vector of features was obtained by calculating variables from the time and frequency domain. See 'features_info.txt' for more details. 
 
 For each record it is provided:
-
 - Triaxial acceleration from the accelerometer (total acceleration) and the estimated body acceleration.
 - Triaxial Angular velocity from the gyroscope. 
 - A 561-feature vector with time and frequency domain variables. 
@@ -16,7 +15,6 @@ For each record it is provided:
 - An identifier of the subject who carried out the experiment.
 
 The dataset includes the following files:
-
 - 'README.txt'
 - 'features_info.txt': Shows information about the variables used on the feature vector.
 - 'features.txt': List of all features.
@@ -27,7 +25,6 @@ The dataset includes the following files:
 - 'test/y_test.txt': Test labels.
 
 The following files are available for the train and test data. Their descriptions are equivalent. 
-
 - 'train/subject_train.txt': Each row identifies the subject who performed the activity for each window sample. Its range is from 1 to 30. 
 - 'train/Inertial Signals/total_acc_x_train.txt': The acceleration signal from the smartphone accelerometer X axis in standard gravity units 'g'. Every row shows a 128 element vector. The same description applies for the 'total_acc_x_train.txt' and 'total_acc_z_train.txt' files for the Y and Z axis. 
 - 'train/Inertial Signals/body_acc_x_train.txt': The body acceleration signal obtained by subtracting the gravity from the total acceleration. 
@@ -37,7 +34,7 @@ The following files are available for the train and test data. Their description
 ## Step-by-step Tidying of Data
 
 ### Pre-step
-The script starts off from having downloaded the .zip containing measurement data around **Human Activity Recognition Using Smartphones Dataset** to the local folder. The working directory should point towards the folder immediately unzipped from the file.
+The script starts off from having downloaded the .zip containing measurement data around **"Human Activity Recognition Using Smartphones Dataset"** to the local folder. The working directory should point towards the folder immediately unzipped from the file.
 
 **Note**: One may need to reset the working directory at the top of the script to one's own working directory.
 
@@ -47,14 +44,16 @@ The script loads in *features.txt* and *activity_labels_txt*, labels their respe
 The script goes on to load in the x_dataset (measurement results), y_dataset (activity recorded), and subject_dataset. Each of the dataset consists of a training data subset and test data subset. The script first combines the columns of each data subset by SubjectID, ActivityID, and then measurement results. After that, the observations in training and test data subsets are combined into a single large dataset, for a total of 10,299 observations and 563 variables (2 of which are SubjectID and ActivityID). The end result is stored as a data frame *merged_data*.
 
 ### Step 2: Extract measurements on the mean and standard deviation
-The Code Book describes the mean to have *-mean()* and standard deviation to have *-std()* in its labeling. The script uses the `grep` function to match an or-condition using `|` for mean and std to be matched, and returns their respective values based on the order of variables. This is stored into *colSelection* variable. Note that **meanFreq** and **angle-related variables** are not specifically mean-related and is **excluded** in the selection.
+The Code Book describes the mean to have *-mean()* and standard deviation to have *-std()* in its labeling. The script uses the `grep` function to match an **or**-condition using `|` for *mean()|std()* to be matched, and returns their respective values based on the order of variables. This is stored into *colSelection* variable. Note that **meanFreq** and **angle-related variables** are not specifically mean-related and is **excluded** in the selection. This is made possible by a double backslash `\\` followed by an opening parenthesis `(` and another double backslash `\\` followed by a closing parenthesis `)`. The `\\` forces the following character to be included in the search at its literal meaning.
+
+Putting all together, the search string for `grep` function will be `"(-mean|-std)\\(\\)"`.
 
 The *colSelection* variable is further enriched with the first and second columns containing the Subject ID and Activity ID. Lastly, the column-filtered dataset is stored as a data frame *filtered_data*.
 
 ### Step 3: Add activity name
-The activity name is contained in the *act_labels* and needs to be merged into this "filtered_data*, so that each observation of the *filtered_data* contains the descriptive activity name. The `merge` function is used to merge `x = *filtered_data*` and `y = *act_labels*`, by the matching of ActivityID field, and all observations are to be merged.
+The activity name is contained in the *act_labels* and needs to be merged into this "filtered_data*, so that each observation of the *filtered_data* contains the descriptive activity name. The `merge` function is used to merge `x = filtered_data` and `y = act_labels`, by the matching of ActivityID field, and all observations are to be merged.
 
-The outcome is stored in the data_frame *merged_actdata*.
+The outcome is stored in the data frame *merged_actdata*.
 
 ### Step 4: Label dataset with descriptive names
 As the dataset contains multiple measurement, and abbreviated, they are descriptive enough in their own sense in conjunction with the Code Book. For this step, the leading *t* for time and *f* for frequency in the variable names are fleshed out to spell *time* and *freq* respectively. Judgment is used so that each variable names don't end up too long and also end up uneasily readable.
@@ -62,9 +61,9 @@ As the dataset contains multiple measurement, and abbreviated, they are descript
 The `gsub` function is used to find the leading *t* and *f* in the column labels, and replace them with *time* and *freq*
 
 ### Step 5: Create a tiny dataset by averaging unique subject-activity identifiers
-Every column in the current *merged_actdata* contains numerical-like values except the column Activity that contains string/character. Therefore, this column is factorized to enable aggregation at the next step.
+Every column in the current *merged_actdata* contains numerical-like values except the column Activity that contains string/character. Therefore, this column is first factorized to enable aggregation at the next step.
 
-The `aggregate` function is used to apply the function `mean` by unique **Activity** and **SubjectID**.
+Next, the `aggregate` function is used to apply the function `mean` by unique **Activity** and **SubjectID**.
 After the aggregation is done, the tidy dataset is further cleaned up to remove legacy of the aggregation and to remove the last column containing the previous character type describing the Activity.
 
 Lastly, the tidy dataset is written out as a *TidyData.txt* in the working directory.
